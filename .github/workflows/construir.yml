@@ -1,0 +1,44 @@
+name: Construir sitio inmobiliario
+on:
+  push:
+    paths: ['build.py', 'guides.b64', '.github/workflows/construir.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Descargar originales aprobados y verificar
+        run: |
+          set -e
+          U=https://carosellsnj-home-guide.yosoycaroluna.chatgpt.site
+          rm -rf docs && mkdir -p docs/_next/static/chunks docs/_next/static/css docs/images
+          curl -fsSL "$U/" -o docs/index.html
+          for c in page-cPYjA9V1 index-CNaBcNk3 layout-segment-context-D__Zupb8 framework-D_rUT4EX rolldown-runtime-C60lm6uB; do curl -fsSL "$U/_next/static/chunks/$c.js" -o "docs/_next/static/chunks/$c.js"; done
+          curl -fsSL "$U/_next/static/css/index.Cr-GOXZh.css" -o docs/_next/static/css/index.Cr-GOXZh.css
+          for i in carolina-about-office.png carolina-welcome-office.png family-home.jpg home.jpg neighborhood-home.jpg; do curl -fsSL "$U/images/$i" -o "docs/images/$i"; done
+          cd docs
+          cat > ../sums.txt <<'EOF'
+          939d0fabebb3b2f01753bb866b067d8d3384fb06da19f0e6557609d3b1a9f4f7  _next/static/chunks/framework-D_rUT4EX.js
+          5854c94f29f1ea889416c33898bb8c7ec5e2a4129e1d227d0c6aa5d53933f022  _next/static/chunks/index-CNaBcNk3.js
+          a73a96394af899d4f63c089125d1f52c11159dd687b0b2a1d92e99ad14d07542  _next/static/chunks/layout-segment-context-D__Zupb8.js
+          5db5ba82eef00d1dee7e86e663098c9427d01183a88d357437daff295aec3e75  _next/static/chunks/rolldown-runtime-C60lm6uB.js
+          0c878f08bc0a7ae5a730584a6e314ca4fe4258b19132ff498fa3a3f616696b34  _next/static/css/index.Cr-GOXZh.css
+          9ccfd392c630b17ba5e743a74370bc91518c55de7e87659d7c095f6b88571968  images/carolina-about-office.png
+          6afcb32c911ff2b3c056eed90b1599eeaa8b293dd8c2ff89534ac60d2a57da81  images/carolina-welcome-office.png
+          3cf2aa066de7536305276623d63a5661a59e6e0fb290c643b29925a1c0518dfb  images/family-home.jpg
+          889ef53353420a091147921a349ed3f045755a337275f50d37a36075a1707692  images/home.jpg
+          197ce17af7a8e797b289338eece0bd4332cc424243d37146f2a089378702956a  images/neighborhood-home.jpg
+          EOF
+          sed -i 's/^ *//' ../sums.txt
+          sha256sum -c ../sums.txt
+          rm ../sums.txt
+      - name: Aplicar cambios aprobados
+        run: python3 build.py docs
+      - name: Guardar
+        run: |
+          git add -A docs
+          git diff --cached --quiet || git -c user.name=Constructor -c user.email=constructor commit -m "Sitio inmobiliario construido"
+          git push
