@@ -1,7 +1,7 @@
 name: Construir sitio inmobiliario
 on:
   push:
-    paths: ['build.py', 'guides.b64', '.github/workflows/construir.yml']
+    paths: ['build.py', 'ajustes.py', 'guides.b64', '.github/workflows/construir.yml']
   workflow_dispatch:
 permissions:
   contents: write
@@ -36,7 +36,7 @@ jobs:
           sha256sum -c ../sums.txt
           rm ../sums.txt
       - name: Aplicar cambios aprobados
-        run: python3 build.py docs
+        run: python3 build.py docs && python3 ajustes.py docs
       - name: Guardar
         run: |
           git add -A docs
