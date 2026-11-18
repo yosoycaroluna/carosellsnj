@@ -12,4 +12,11 @@ for old, new in R:
     if j.count(old) != 1: raise SystemExit("AJUSTE FAILED: " + old[:60])
     j = j.replace(old, new)
 open(P_, "w", encoding="utf-8").write(j)
+# El texto de la pregunta frecuente tambien esta en el HTML renderizado (ingles): debe coincidir con el JS.
+H_ = os.path.join(sys.argv[1], "index.html")
+h = open(H_, encoding="utf-8").read()
+old, new = R[2]
+if h.count(old) != 1: raise SystemExit("AJUSTE HTML FAILED")
+h = h.replace(old, new.replace("’", "’"))
+open(H_, "w", encoding="utf-8").write(h)
 print("AJUSTES OK")
